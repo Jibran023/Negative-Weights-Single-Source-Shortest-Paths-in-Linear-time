@@ -1,0 +1,72 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+\title{Checkpoint 1 Report: Negative-Weight Single-Source Shortest Paths in Near-Linear Time}
+\author{Team: 68 \\
+Muhammad Daniyal Farooqui, Jibran Sheikh}
+
+\begin{document}
+
+\maketitle
+
+\section{Paper Selection Proposal}
+
+\subsection{Paper Details}
+
+\begin{itemize}
+    \item \textbf{Title:} Negative-Weight Single-Source Shortest Paths in Near-Linear Time
+    \item \textbf{Authors:} Aaron Bernstein, Danupon Nanongkai, Christian Wulff-Nilsen
+    \item \textbf{Conference:} Communications of the ACM Vol. 68, No. 2
+    \item \textbf{Year:} 2023 (updated)
+    \item \textbf{Link:} \url{https://dl.acm.org/doi/10.1145/3631536}
+\end{itemize}
+
+\subsection{Summary}
+
+The paper addresses the Single-Source Shortest Paths (SSSP) problem in directed graphs with negative edge weights, a fundamental challenge in graph algorithms. Traditional methods like Bellman-Ford have high time complexity \( O(mn) \), which is impractical for large graphs. Recent approaches rely on complex optimization techniques, introducing significant overhead. 
+
+The authors present a **combinatorial algorithm** achieving near-linear runtime \( O(m \log^6 n \log W) \), significantly simplifying prior methods. 
+
+Key innovations include:
+\begin{itemize}
+    \item **Price functions** to transform edge weights into non-negative values.
+    \item **Low-diameter decomposition** to partition the graph into manageable components.
+    \item **Recursive scaling** to progressively eliminate negative weights.
+\end{itemize}
+
+\subsection{Justification}
+
+The paper was selected for the following reasons:
+
+\begin{itemize}
+    \item \textbf{Theoretical Impact:} Resolves a decades-old problem with a near-optimal solution.
+    \item \textbf{Practical Relevance:} Applicable to logistics (e.g., routes with fuel rebates), financial arbitrage, and network optimization.
+    \item \textbf{Simplicity:} Avoids complex continuous optimization, making it more accessible for implementation.
+    \item \textbf{Classroom Relevance:} We have already studied both algorithms in class, and it would be interesting to work on the shortcomings of those algorithms and overcome them using a single unified algorithm.
+\end{itemize}
+
+\subsection{Implementation Feasibility}
+
+\textbf{Resources:}
+\begin{itemize}
+    \item \textbf{Theoretical Foundation:} Detailed pseudocode and proofs are provided.
+    \item \textbf{Code Repositories:} No public code exists, but standard graph libraries (e.g., NetworkX, Boost Graph) can be adapted.
+    \item \textbf{Datasets:} Synthetic graphs with negative weights.
+\end{itemize}
+
+\textbf{Theoretical Descriptions:}
+\begin{itemize}
+    \item Efficient handling of probabilistic graph decomposition.
+    \item Optimizing priority queues for the hybrid Dijkstra-Bellman-Ford.
+\end{itemize}
+
+\subsection{Team Responsibilities}
+\begin{itemize}
+    \item \textbf{Reading and Analyzing the Paper:} Muhammad Daniyal Farooqui
+    \item \textbf{Coding and Implementation:} Jibran Sheikh, Muhammad Daniyal Farooqui
+    \item \textbf{Writing:} Jibran Sheikh
+\end{itemize}
+
+\end{document}

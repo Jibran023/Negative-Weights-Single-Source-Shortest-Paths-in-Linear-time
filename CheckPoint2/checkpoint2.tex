@@ -1,0 +1,141 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+\title{Checkpoint 2 Report: Negative-Weight Single-Source Shortest Paths in Near-Linear Time}
+\author{Team: Jibran Sheikh, Daniyal Farooqui}
+
+\begin{document}
+
+\maketitle
+
+\section{Problem and Contributions}
+
+\subsection{Problem}
+The paper addresses the Single-Source Shortest Paths (SSSP) problem in directed graphs with negative edge weights. Traditional algorithms, such as Bellman-Ford, have a time complexity of \( O(mn) \), which becomes impractical for large graphs. Recent approaches, such as those relying on min-cost flow reductions, introduce significant overhead due to their dependence on complex continuous optimization.
+
+\subsection{Main Contribution}
+The authors present a combinatorial algorithm that solves the negative-weight SSSP problem in \( O(m \log^8 n \log W) \) time, where \( W \) is the absolute value of the most negative edge weight. This represents the first near-linear time solution for this problem, avoiding the need for complex optimization techniques and significantly simplifying prior methods.
+
+\section{Algorithmic Description}
+
+\textbf{Input:} A directed graph \( G = (V, E) \) with integer edge weights (which may be negative), and a source vertex \( s \). \\
+\textbf{Output:} Shortest paths from \( s \) to all vertices, or detection of a negative-weight cycle.
+
+\subsection{Core Components}
+
+\begin{itemize}
+    \item \textbf{Price Functions:} Adjust edge weights to non-negative values using vertex potentials (as in Johnson's technique).
+    \item \textbf{Low-Diameter Decomposition:} 
+        \begin{itemize}
+            \item Partition the graph into strongly connected components (SCCs) with weak diameter \( D \) by removing a small set of edges \( E^{rem} \).
+            \item Ensures each SCC has \( dist(u, v) \leq D \) for all \( u, v \in \text{SCC} \).
+            \item Probabilistic edge removal: \( Pr[e \in E^{rem}] = O \left( \frac{w(e) \log^2 n}{D} \right) \).
+        \end{itemize}
+    \item \textbf{Recursive Scaling (ScaleDown):} 
+        \begin{itemize}
+            \item Recursively decompose the graph and eliminate negative weights.
+            \item Uses \texttt{FixDAGEdges} to handle inter-component edges (DAG structure) and \texttt{ElimNeg} to resolve residual negative edges.
+        \end{itemize}
+\end{itemize}
+
+\subsection{Detailed Explanation of Key Components}
+
+\subsubsection{Price Functions}
+The \textbf{Price Functions} are used to reweight the edges of the graph so that the resulting weights become non-negative, making it possible to apply algorithms like Dijkstra's. This step is crucial for dealing with negative-weight edges efficiently. In this paper, the authors use a technique similar to *Johnson's framework*, where the edge weights are transformed using a potential function \( \phi(v) \) assigned to each vertex \( v \). The new weight of an edge \( (u, v) \) is computed as:
+\[
+w'(u, v) = w(u, v) + \phi(u) - \phi(v)
+\]
+This ensures that all edge weights are non-negative, as the transformation adjusts the original weight by the difference between the potentials of the vertices. The potential function \( \phi(v) \) is typically computed using a modified version of the *Bellman-Ford* algorithm, ensuring that the reweighted graph preserves the shortest path structure of the original graph. By converting all edge weights to non-negative values, the problem becomes solvable by standard shortest path algorithms, such as Dijkstra's, in linear time.
+
+\subsubsection{Low-Diameter Decomposition (LDD)}
+The \textbf{Low-Diameter Decomposition (LDD)} is a technique used to simplify the graph by dividing it into smaller subgraphs, making the overall shortest path problem easier to handle. The LDD algorithm partitions the graph into *strongly connected components (SCCs), where each component has a **weak diameter* of at most \( D \). The weak diameter of a component is defined as the maximum shortest path between any two vertices within that component.
+
+To achieve this, a probabilistic edge removal technique is used. A set of edges, \( E^{rem} \), is removed such that the remaining graph is decomposed into SCCs with the desired weak diameter. The removal probability for each edge is computed as:
+\[
+Pr[e \in E^{rem}] = O \left( \frac{w(e) \log^2 n}{D} \right)
+\]
+where \( w(e) \) is the weight of the edge, \( n \) is the number of vertices, and \( D \) is the bound on the diameter of the SCCs. This random edge removal ensures that the resulting graph has smaller, manageable subgraphs with guaranteed diameter bounds, which reduces the complexity of finding the shortest paths. Each SCC is then processed individually, and their interconnections are handled using the recursive scaling technique. By breaking the graph into smaller components with bounded diameters, the problem becomes easier to solve, as the maximum path length within each component is constrained.
+
+\subsection{High-Level Workflow}
+
+\begin{enumerate}
+    \item \textbf{Scaling Framework:} 
+        \begin{itemize}
+            \item Scale edge weights to ensure all weights are \( \geq -1 \).
+            \item Use \texttt{SPmain} to iteratively adjust prices via recursive calls to \texttt{ScaleDown}.
+        \end{itemize}
+    \item \textbf{Key Subroutines:}
+        \begin{itemize}
+            \item \texttt{ElimNeg:} Hybrid of Dijkstra and Bellman-Ford to handle graphs with a few negative edges.
+            \item \texttt{FixDAGEdges:} Ensures non-negative weights across DAG components.
+        \end{itemize}
+\end{enumerate}
+
+\subsection{Example}
+For a graph \( G \) with negative edges:
+\begin{itemize}
+    \item Apply \texttt{LowDiamDecomposition} to split \( G \) into SCCs.
+    \item Recursively fix weights inside SCCs using \texttt{ScaleDown}.
+    \item Adjust inter-component edges via \texttt{FixDAGEdges}.
+    \item Finally, run \texttt{ElimNeg} to resolve remaining negative edges.
+\end{itemize}
+
+\section{Comparison with Existing Approaches}
+
+\begin{table}[h!]
+    \centering
+    \resizebox{\textwidth}{!}{
+    \begin{tabular}{|c|c|c|c|}
+    \hline
+    \textbf{Method} & \textbf{Time Complexity} & \textbf{Key Limitations} & \textbf{Novelty of This Work} \\
+    \hline
+    Bellman-Ford & \( O(mn) \) & Too slow for large graphs. & Near-linear time via combinatorial techniques. \\
+    \hline
+    Dijkstra's Algorithm & \( O(m + n \log n) \) & Requires non-negative weights. & Generalizes to negative-weight graphs with combinatorial techniques. \\
+    \hline
+    Min-Cost Flow Reductions & \( \tilde{O}(m^{4/3} \log W) \) & Requires complex continuous optimization. & Purely combinatorial, simpler implementation. \\
+    \hline
+    \end{tabular}
+    }
+    \caption{Comparison of approaches for negative-weight SSSP.}
+\end{table}
+\section{Data Structures and Techniques}
+
+\begin{itemize}
+    \item \textbf{Graph Decomposition:} Low-diameter partitioning via randomized edge removal.
+    \item \textbf{Priority Queues:} Used in \texttt{ElimNeg} for Dijkstra-like phases.
+    \item \textbf{Dynamic Programming:} For \texttt{FixDAGEdges} to assign prices in topological order.
+    \item \textbf{Recursive Scaling:} Reduces edge weight magnitudes iteratively.
+    \item \textbf{Probabilistic Analysis:} Bounding edge removal probabilities in decomposition.
+\end{itemize}
+
+\section{Implementation Outlook}
+
+\subsection{Challenges}
+\begin{itemize}
+    \item \textbf{Low-Diameter Decomposition:}
+        \begin{itemize}
+            \item Efficiently computing SCCs with diameter guarantees.
+            \item Handling probabilistic edge removal while maintaining correctness.
+        \end{itemize}
+    \item \textbf{Recursive Scaling:}
+        \begin{itemize}
+            \item Managing multiple scaling phases and ensuring termination.
+            \item Numerical precision with large \( W \), mitigated by integer weights.
+        \end{itemize}
+    \item \textbf{Hybrid Algorithms:}
+        \begin{itemize}
+            \item Integrating Dijkstra and Bellman-Ford in \texttt{ElimNeg} without priority queue bottlenecks.
+        \end{itemize}
+\end{itemize}
+
+\subsection{Strategies}
+\begin{itemize}
+    \item \textbf{Prototyping:} Implement core subroutines (e.g., \texttt{ScaleDown}, \texttt{LowDiamDecomposition}) in Python/NetworkX for validation.
+    \item \textbf{Optimization:} Switch to C++/Boost Graph for performance-critical components (e.g., priority queues).
+    \item \textbf{Testing:} Use synthetic graphs with controlled negative cycles for correctness checks.
+\end{itemize}
+
+\end{document}
